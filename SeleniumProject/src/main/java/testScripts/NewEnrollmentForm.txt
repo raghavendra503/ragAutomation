@@ -1,0 +1,502 @@
+package page;
+
+import java.util.List;
+
+import org.apache.poi.ss.usermodel.Row;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptException;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.CacheLookup;
+import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.How;
+import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.Sleeper;
+
+import com.anthem.selenium.SuperHelper;
+import com.anthem.selenium.constants.KeyConstants;
+
+import utility.ApplicationMethods;
+import utility.ConstantsHelper;
+import utility.CoreSuperHelper;
+import utility.ExcelMethods;
+
+public class NewEnrollmentForm extends ConstantsHelper {
+
+	/**
+	 * <p>
+	 * Singleton instance of this Script (EnrollmentPorcessing) to support Interface
+	 * (page Object) components.
+	 * </p>
+	 * <p>
+	 * This is not required for DriverScript components.
+	 * </p>
+	 */
+	private static NewEnrollmentForm thisTestObj;
+
+	/**
+	 * <p>
+	 * Getter method for the singleton EnrollmentPorcessing instance.
+	 * </p>
+	 * 
+	 * @return the singleton instance of EnrollmentPorcessing
+	 */
+	public static NewEnrollmentForm get() {
+		thisTestObj = PageFactory.initElements(getWebDriver(), NewEnrollmentForm.class);
+		return thisTestObj;
+	}
+
+	@FindBy(how = How.ID, using = "aspnetForm")
+	
+	@CacheLookup
+	public WebElement form;
+
+	@FindBy(how = How.XPATH, using = ".//*[@id='ctl00_enrollmentContentPlaceHolder_documentControlNumberTextBox']") // *[contains(@name,'USER')]")
+	public WebElement DCN;
+
+	@FindBy(how = How.XPATH, using = ".//*[@id='ctl00_enrollmentContentPlaceHolder_enrollmentSourceDropDownList']")
+	@CacheLookup
+	public WebElement enrollmentSource;
+
+	@FindBy(how = How.XPATH, using = ".//*[@id='ctl00_enrollmentContentPlaceHolder_lastNameTextBox']")
+	@CacheLookup
+	public WebElement lastName;
+
+	@FindBy(how = How.XPATH, using = ".//*[@id='ctl00_enrollmentContentPlaceHolder_firstNameTextBox']")
+	@CacheLookup
+	public WebElement firstName;
+
+	@FindBy(how = How.XPATH, using = ".//*[@id='ctl00_enrollmentContentPlaceHolder_middleInitialTextBox']")
+	@CacheLookup
+	public WebElement mi;
+
+	@FindBy(how = How.XPATH, using = ".//*[@id='ctl00_enrollmentContentPlaceHolder_sexDropDownList']")
+	@CacheLookup
+	public WebElement gender;
+
+	@FindBy(how = How.XPATH, using = ".//*[@id='ctl00_enrollmentContentPlaceHolder_dateOfBirthTextBox']")
+	@CacheLookup
+	public WebElement birthDate;
+
+	@FindBy(how = How.XPATH, using = ".//*[@id='ctl00_enrollmentContentPlaceHolder_permanentAddress1TextBox']")
+	@CacheLookup
+	public WebElement permanentAddress;
+
+	@FindBy(how = How.XPATH, using = "//*[@id='ctl00_enrollmentContentPlaceHolder_permanentCityTextBox']")
+	public WebElement city;
+
+	@FindBy(how = How.XPATH, using = "//*[@id='ctl00_enrollmentContentPlaceHolder_permanentstateDropDownList']")
+	public WebElement state;
+
+	@FindBy(how = How.ID, using = "ctl00_enrollmentContentPlaceHolder_permanentZipCodeTextBox")
+	public WebElement zip;
+
+	@FindBy(how = How.ID, using = "ctl00_enrollmentContentPlaceHolder_countyDropDownList")
+	public WebElement county;
+
+	@FindBy(how = How.ID, using = "ctl00_enrollmentContentPlaceHolder_phoneNumberTextBox")
+	@CacheLookup
+	public WebElement phone;
+
+	@FindBy(how = How.ID, using = "ctl00_enrollmentContentPlaceHolder_useForMailAddressCheckBox")
+	public WebElement mailingAddressCheckbox;
+
+	@FindBy(how = How.ID, using = "ctl00_enrollmentContentPlaceHolder_salesApplicationReceivedTextBox")
+	public WebElement salesAppRec;
+
+	@FindBy(how = How.ID, using = "ctl00_enrollmentContentPlaceHolder_asmEffectiveMonthTextBox")
+	public WebElement asmEffectiveMonth;
+
+	@FindBy(how = How.ID, using = "ctl00_enrollmentContentPlaceHolder_asmEffectiveYearTextBox")
+	public WebElement asmEffectiveYear;
+
+	@FindBy(how = How.NAME, using = "ctl00$enrollmentContentPlaceHolder$groupDropDownList")
+	public WebElement group;
+
+	@FindBy(how = How.NAME, using = "ctl00$enrollmentContentPlaceHolder$packageDropDownList")
+	public WebElement packageName;
+
+	@FindBy(how = How.ID, using = "ctl00_enrollmentContentPlaceHolder_healthInsuranceCliamNumberTextBox")
+	public WebElement medicareID;
+
+	@FindBy(how = How.ID, using = "ctl00_enrollmentContentPlaceHolder_partAEffMonthTextBox")
+	public WebElement partAEffDate_Month;
+
+	@FindBy(how = How.ID, using = "ctl00_enrollmentContentPlaceHolder_partAEffYearTextBox")
+	public WebElement partAEffDate_Year;
+
+	@FindBy(how = How.ID, using = "ctl00_enrollmentContentPlaceHolder_partBEffMonthTextBox")
+	public WebElement partBEffDate_Month;
+
+	@FindBy(how = How.ID, using = "ctl00_enrollmentContentPlaceHolder_partBEffYearTextBox")
+	public WebElement partBEffDate_Year;
+
+	@FindBy(how = How.ID, using = "ctl00_enrollmentContentPlaceHolder_newPcpButton")
+	public WebElement PCPSearchIcon;
+
+	@FindBy(how = How.ID, using = "ctl00_enrollmentContentPlaceHolder_premiumReceivedDropDownList")
+	@CacheLookup
+	public WebElement premiumReceived;
+
+	@FindBy(how = How.ID, using = "ctl00_enrollmentContentPlaceHolder_endStageRenalDiseaseDropDownList")
+	@CacheLookup
+	public WebElement ESRD;
+
+	@FindBy(how = How.ID, using = "ctl00_enrollmentContentPlaceHolder_ChronicIndicatorCheckBox")
+	@CacheLookup
+	public WebElement formIndicator2728;
+
+	@FindBy(how = How.XPATH, using = "//span[@id='ctl00_enrollmentContentPlaceHolder_electionperiodRadioButtonList']")
+	@CacheLookup
+	public WebElement electionPeriodsRadio;
+
+	@FindBy(how = How.ID, using = "ctl00_enrollmentContentPlaceHolder_electionperiodRadioButtonList_2")
+	public WebElement SEPRadio;
+
+	@FindBy(how = How.ID, using = "ctl00_enrollmentContentPlaceHolder_electionperiodRadioButtonList_3")
+	public WebElement AEPRadio;
+	
+	@FindBy(how = How.ID, using = "ctl00_enrollmentContentPlaceHolder_electionperiodRadioButtonList_6")
+	public WebElement OEPRadio;
+
+	@FindBy(how = How.ID, using = "ctl00_enrollmentContentPlaceHolder_specialElectionPeriodDropDownList")
+	public WebElement SEPReason;
+
+	@FindBy(how = How.ID, using = "ctl00_enrollmentContentPlaceHolder_applicationSignedDropDownList")
+	@CacheLookup
+	public WebElement applicationSign;
+
+	@FindBy(how = How.ID, using = "ctl00_enrollmentContentPlaceHolder_signatureDateTextBox")
+	@CacheLookup
+	public WebElement memberSignatureDate;
+
+	// Sales Rep information section
+	@FindBy(how = How.ID, using = "ctl00_enrollmentContentPlaceHolder_completedChecklistAttachedDropDownList")
+	@CacheLookup
+	public WebElement completedChecklistAttchd;
+
+	@FindBy(how = How.ID, using = "ctl00_enrollmentContentPlaceHolder_DSNPVerificationCodeTextBox")
+	@CacheLookup
+	public WebElement dsnpVerificationCode;
+
+	@FindBy(how = How.ID, using = "ctl00_enrollmentContentPlaceHolder_saveButton")
+	public WebElement save;
+
+	@FindBy(how = How.ID, using = "ctl00_enrollmentContentPlaceHolder_cancelButton")
+	public WebElement cancel;
+
+	@FindBy(how = How.XPATH, using = "//span[@id='ctl00_validationSummaryLabel']")
+	public WebElement messageSummary;
+
+	/**
+	 * Method to fill Pre Entry section from UI Enrollment
+	 * 
+	 * @param
+	 * @return
+	 */
+	public void fillPreEntryData() {
+		try {
+			int DCN;
+			// Select LOB
+			seWaitForElementLoad(SelectLOB.get().medicareAdvantage);
+			seClick(false, SelectLOB.get().medicareAdvantage, "Medicare Advantage");
+			seClick(SelectLOB.get().next, "Next");
+			seWaitForPageLoad();
+			Thread.sleep(2000);
+			// Move to ASA_AMP_2020 menu
+			Actions action = new Actions(getWebDriver());
+			action.moveToElement(MemberHome.get().newEnrollment).perform();
+			action.moveToElement(MemberHome.get().ASA_AMP).perform();
+			if (getCellValue("EnrollmentYear").contains("2020")) {
+				action.moveToElement(MemberHome.get().ASA_AMP_2020).click(MemberHome.get().ASA_AMP_2020).build()
+						.perform();
+			} else if (getCellValue("EnrollmentYear").contains("2019")) {
+				action.moveToElement(MemberHome.get().ASA_AMP_2019).click(MemberHome.get().ASA_AMP_2019).build()
+						.perform();
+			} else if (getCellValue("EnrollmentYear").contains("2018")) {
+				action.moveToElement(MemberHome.get().ASA_AMP_2018).click(MemberHome.get().ASA_AMP_2018).build()
+						.perform();
+			} else if (getCellValue("EnrollmentYear").contains("2017")) {
+				action.moveToElement(MemberHome.get().ASA_AMP_2017).click(MemberHome.get().ASA_AMP_2017).build()
+						.perform();
+			}
+
+			// Fill New Enrollment Form
+			Thread.sleep(1000);
+			seWaitForPageLoad();
+			seWaitForWebElement(9, ExpectedConditions.elementToBeClickable(NewEnrollmentForm.get().DCN));
+			DCN = randomNumber(8);
+			seSetText(NewEnrollmentForm.get().DCN, String.valueOf(DCN), "Input DCN");
+			NewEnrollmentForm.get().form.click();
+			seSetText(NewEnrollmentForm.get().DCN, String.valueOf(DCN), "Input DCN");
+			lastName_UIEnroll = ApplicationMethods.getRandomNameFrmDictionary("lastName");
+			seSetText(NewEnrollmentForm.get().lastName, lastName_UIEnroll, "Input Last Name");
+			NewEnrollmentForm.get().form.click();
+			seSetText(NewEnrollmentForm.get().lastName, lastName_UIEnroll, "Input Last Name");
+			firstName_UIEnroll = ApplicationMethods.getRandomNameFrmDictionary("firstName");
+			seSetText(NewEnrollmentForm.get().firstName, firstName_UIEnroll, "Input first Name");
+			NewEnrollmentForm.get().form.click();
+			seSetText(NewEnrollmentForm.get().firstName, firstName_UIEnroll, "Input first Name");
+			middleName_UIEnroll = ApplicationMethods.getRandomMiddleName();
+			seSetText(NewEnrollmentForm.get().mi, middleName_UIEnroll, "Input Middle");
+			NewEnrollmentForm.get().form.click();
+			seSetText(NewEnrollmentForm.get().mi, middleName_UIEnroll, "Input Middle");
+			seSelectText(NewEnrollmentForm.get().gender, getCellValue("Gender"), "Input Gender");
+			NewEnrollmentForm.get().form.click();
+			seSelectText(NewEnrollmentForm.get().gender, getCellValue("Gender"), "Input Gender");
+			birthDate_UIEnroll = ExcelMethods.formatDate(ApplicationMethods.getDOB());
+			seSetText(NewEnrollmentForm.get().birthDate, birthDate_UIEnroll, "Input BirthDate");
+			NewEnrollmentForm.get().form.click();
+			seSetText(NewEnrollmentForm.get().birthDate, birthDate_UIEnroll, "Input BirthDate");
+
+			// Address section
+			seSetText(NewEnrollmentForm.get().permanentAddress, getCellValue("PermanantAddress"),
+					"Input PermanantAddress");
+			seSetText(NewEnrollmentForm.get().city, getCellValue("City"), "Input City");
+			ConstantsHelper.state = getCellValue("State");
+			seSelectText(NewEnrollmentForm.get().state, ConstantsHelper.state, "Input State");
+			NewEnrollmentForm.get().form.click();
+			seWaitForPageLoad();
+			seWaitForElementLoad(NewEnrollmentForm.get().zip);
+			while (!(NewEnrollmentForm.get().zip.isDisplayed())) {
+
+			}
+			seSetText(NewEnrollmentForm.get().zip, getCellValue("ZIP"), "Input ZIP");
+			NewEnrollmentForm.get().form.click();
+			seSetText(NewEnrollmentForm.get().zip, getCellValue("ZIP"), "Input ZIP");
+			NewEnrollmentForm.get().form.click();
+			seWaitForPageLoad();
+			while (!(NewEnrollmentForm.get().phone.isDisplayed())) {
+
+			}
+			seSetText(NewEnrollmentForm.get().phone, getCellValue("Phone"), "Input Phone");
+			NewEnrollmentForm.get().form.click();
+			seWaitForPageLoad();
+			// seWaitForWebElement(3,
+			// ExpectedConditions.elementToBeClickable(NewEnrollmentForm.get().phone));
+			seSetText(NewEnrollmentForm.get().phone, getCellValue("Phone"), "Input Phone");
+			NewEnrollmentForm.get().form.click();
+			ConstantsHelper.county = new Select(NewEnrollmentForm.get().county).getFirstSelectedOption().getText();
+			seWaitForPageLoad();
+			seSetText(NewEnrollmentForm.get().salesAppRec, getCellValue("SalesAppRecDate"), "Input SalesAppRec Date");
+			NewEnrollmentForm.get().form.click();
+			seSetText(NewEnrollmentForm.get().salesAppRec, getCellValue("SalesAppRecDate"), "Input SalesAppRec Date");
+			NewEnrollmentForm.get().form.click();
+			Thread.sleep(1000);
+			seWaitForPageLoad();
+			// seWaitForWebElement(3000,ExpectedConditions.elementToBeClickable(NewEnrollmentForm.get().asmEffectiveMonth));
+			NewEnrollmentForm.get().asmEffectiveMonth.clear();
+			while (!(NewEnrollmentForm.get().asmEffectiveMonth.isDisplayed())) {
+
+			}
+			seSetText(NewEnrollmentForm.get().asmEffectiveMonth, getCellValue("ASMEffectiveMonth"),
+					"Input ASM Effective Month");
+			NewEnrollmentForm.get().form.click();
+			seWaitForPageLoad();
+			NewEnrollmentForm.get().asmEffectiveYear.clear();
+			Thread.sleep(2000);
+			seWaitForWebElement(2000,
+					ExpectedConditions.elementToBeClickable(NewEnrollmentForm.get().asmEffectiveYear));
+			while (!(NewEnrollmentForm.get().asmEffectiveYear.isDisplayed())) {
+
+			}
+			// NewEnrollmentForm.get().asmEffectiveYear.clear();
+			// Thread.sleep(2000);
+			seSetText(NewEnrollmentForm.get().asmEffectiveYear, getCellValue("ASMEffectiveYear"),
+					"Input ASM Effective Year");
+			// Thread.sleep(2000);
+			NewEnrollmentForm.get().form.click();
+			seWaitForPageLoad();
+			seSelectText(NewEnrollmentForm.get().group, getCellValue("Group"), "Input Group");
+			NewEnrollmentForm.get().form.click();
+			// Thread.sleep(3000);
+			Thread.sleep(1000);
+			seWaitForPageLoad();
+//			while (!(NewEnrollmentForm.get().packageName.isDisplayed())) {
+//			}
+			
+			seSelectText(NewEnrollmentForm.get().packageName, getCellValue("Package"), "Input Package");
+			NewEnrollmentForm.get().form.click();
+			
+			//seVerifyFieldValue(NewEnrollmentForm.get().packageName, getCellValue("Package"), "Package Name");
+			seWaitForPageLoad();
+			seClick(NewEnrollmentForm.get().mailingAddressCheckbox, "Mailing Address");
+			seClick(NewEnrollmentForm.get().mailingAddressCheckbox, "Mailing Address");
+			NewEnrollmentForm.get().form.click();
+		} catch (Exception e) {
+			setResult(false);
+			e.printStackTrace();
+			log(FAIL, e.getMessage());
+		}
+	}
+
+	/**
+	 * Method to fill Medicare Card Information section from UI Enrollment
+	 * 
+	 * @param
+	 * @return
+	 */
+	public void fillMedicareCardInfo() throws InterruptedException {
+		seWaitForPageLoad();
+		seWaitForWebElement(4, ExpectedConditions.elementToBeClickable(medicareID));
+		medicareID_autoGen = ApplicationMethods.generateEINumber();
+		seSetText(NewEnrollmentForm.get().medicareID, medicareID_autoGen, "Input MedicareID");
+		NewEnrollmentForm.get().form.click();
+		seWaitForWebElement(2000, ExpectedConditions.visibilityOf(NewEnrollmentForm.get().medicareID));
+		seSetText(NewEnrollmentForm.get().medicareID, medicareID_autoGen, "Input MedicareID");
+		seSetText(NewEnrollmentForm.get().partAEffDate_Month, getCellValue("PartAEffDateMonth"),
+				"Input Part A EffDate Year");
+		seSetText(NewEnrollmentForm.get().partAEffDate_Year, getCellValue("PartAEffDateYear"),
+				"Input PartA EffDate Year");
+		seSetText(NewEnrollmentForm.get().partBEffDate_Month, getCellValue("PartBEffDateMonth"),
+				"Input Part B EffDate month");
+		seSetText(NewEnrollmentForm.get().partBEffDate_Year, getCellValue("PartBEffDateYear"),
+				"Input Part B EffDate Year");
+	}
+
+	/**
+	 * Method to fill PCP section from UI Enrollment
+	 * 
+	 * @param
+	 * @return
+	 */
+	public void fillPCPEntry() {
+		int statusCol = 0, count = 0;
+		boolean elementFound = false;
+		try {
+			if (!(getCellValue("PlanType").equalsIgnoreCase("PPO Plan"))) {
+				if(!(getCellValue("PCPID").equalsIgnoreCase(""))){
+					seClick(NewEnrollmentForm.get().PCPSearchIcon, "PCP Search Icon");
+					// PCP Pop up
+					seSwitchToNewWindow();
+					seWaitForWebElement(5, ExpectedConditions.visibilityOf(MemberPCPSearchPopUP.get().PCPID));
+					seSetText(MemberPCPSearchPopUP.get().PCPID, getCellValue("PCPID"), "Input PCP ID");
+					seClick(MemberPCPSearchPopUP.get().search, "Search");
+					seWaitForWebElement(5,
+							ExpectedConditions.elementToBeClickable(MemberPCPSearchPopUP.get().pcpSearchGrid));
+					// Get Status Column from PCP Search results grid
+					List<WebElement> rows = MemberPCPSearchPopUP.get().pcpSearchGrid.findElements(By.tagName("tr"));
+					for (int i = 0; i < rows.size(); i++) {
+						List<WebElement> headerCells = rows.get(i).findElements(By.tagName("th"));
+						for (int j = 0; j < headerCells.size(); j++) {
+							if (headerCells.get(j).getText().contains("Status")) {
+								statusCol = j;
+								break;
+							}
+						}
+						if (statusCol != 0) {
+							break;
+						}
+					}
+					// Select Active element from Search Results
+					for (int l = 1; l < rows.size(); l++) {
+						WebElement row = rows.get(l);
+						try {
+							List<WebElement> cells = row.findElements(By.xpath("//td"));
+							if (cells.get(statusCol).getText().contains("ACTIVE")) {
+								cells.get(0)
+										.findElement(
+												By.xpath("//input[@id='pcpSearchGridView_ctl02_providerCheckBox']"))
+										.click();
+								seClick(MemberPCPSearchPopUP.get().OK, "OK");
+								elementFound = true;
+								break;
+							} else {
+								if ((l == rows.size() - 1) && (MemberPCPSearchPopUP.get().next.isEnabled())) {
+									seClick(MemberPCPSearchPopUP.get().next, "Next");
+									seWaitForWebElement(6, ExpectedConditions
+											.elementToBeClickable(MemberPCPSearchPopUP.get().pcpSearchGrid));
+									l = 1;
+									rows = MemberPCPSearchPopUP.get().pcpSearchGrid.findElements(By.tagName("tr"));
+								}
+							}
+
+						} catch (Exception e) {
+							e.printStackTrace();
+							log(FAIL, e.getMessage(), true);
+							setResult(false);
+						}
+					}
+					if (elementFound == false) {
+						log(FAIL, "Unable to select valid PCP from search results", true);
+						setResult(false);
+					}
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			log(FAIL, e.getMessage(), true);
+			setResult(false);
+		}
+	}
+
+	/**
+	 * Method to fill Monthly Premium from UI Enrollment
+	 * 
+	 * @param
+	 * @return
+	 */
+	public void fillMonthlyPremium() {
+		// Monthly Premium section
+		seSelectText(NewEnrollmentForm.get().premiumReceived, getCellValue("PremiumReceived"), "Input PremiumReceived");
+	}
+
+	/**
+	 * Method to fill Enroll Data from UI Enrollment
+	 * 
+	 * @param
+	 * @return
+	 */
+	public void fillEnroleeData() {
+		seSelectText(NewEnrollmentForm.get().ESRD, getCellValue("ESRD"), "Input ESRD");
+		NewEnrollmentForm.get().form.click();
+	}
+
+	/**
+	 * Method to fill Election period seciton from UI Enrollment
+	 * 
+	 * @param
+	 * @return
+	 */
+	public void fillElectionPeriods() {
+		try {
+			if (getCellValue("SEP").equalsIgnoreCase("Y") || getCellValue("SEP").equalsIgnoreCase("YES")) {
+				seClick(NewEnrollmentForm.get().SEPRadio, "SEP Radio button");
+				seClick(NewEnrollmentForm.get().SEPRadio, "SEP Radio button");
+				seClick(NewEnrollmentForm.get().SEPRadio, "SEP Radio button");
+				Thread.sleep(1000);
+				NewEnrollmentForm.get().form.click();
+				if ((NewEnrollmentForm.get().SEPReason).isEnabled() == true) {
+					seSelectText(NewEnrollmentForm.get().SEPReason, getCellValue("SEPReason"), "SEP Reason");
+				}
+			} else if (getCellValue("AEP").equalsIgnoreCase("Y") || getCellValue("AEP").equalsIgnoreCase("YES")) {
+				seClick(NewEnrollmentForm.get().AEPRadio, "AEP Radio button");
+			}else if (getCellValue("OEP").equalsIgnoreCase("Y") || getCellValue("OEP").equalsIgnoreCase("YES")) {
+			seClick(NewEnrollmentForm.get().OEPRadio, "OEP Radio button");
+		}
+		} catch (Exception e) {
+			log(FAIL, e.getMessage(), true);
+			setResult(false);
+		}
+
+	}
+
+	/**
+	 * Method to fill Signature Autorization section from UI Enrollment
+	 * 
+	 * @param
+	 * @return
+	 */
+
+	public void fillSignartureAuthorization() {
+		seSelectText(NewEnrollmentForm.get().applicationSign, "Yes", "Appl Signed");
+		seSetText(NewEnrollmentForm.get().memberSignatureDate, getDate("MM/dd/yyyy", "Current"));
+
+	}
+
+}

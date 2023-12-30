@@ -1,0 +1,378 @@
+package testScripts;
+
+import java.io.File;
+
+import org.openqa.selenium.Alert;
+import org.openqa.selenium.NoAlertPresentException;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import com.anthem.selenium.utility.EnvHelper;
+
+import page.CSNPTracking;
+import page.DSNPTracking;
+import page.ISNP_ESNPTracking;
+import page.MemberHome;
+import page.MemberProfile;
+import page.MemberSearch;
+import page.NewEnrollmentForm;
+import page.SelectLOB;
+import utility.ApplicationMethods;
+import utility.ConstantsHelper;
+
+public class UIMemberEnrollment extends ConstantsHelper {
+	static String filePath = EnvHelper.getValue("filePath");
+	public static boolean createHeaderFlag = true;
+	public static boolean dltBEQFlag = true;
+	public static boolean deleteFileFlag=true;
+	public static int count = 0;
+	static File file = new File(EnvHelper.getValue("filePath") + EnvHelper.getValue("UIOutputFile"));
+	public static void aTAFInitParams() {
+		MANUAL_TC_EXECUTION_EFFORT = "00:20:00";
+	}
+
+	public static void main(String[] args) {
+		aTAFInitParams();
+		initiateTestScript();
+	}
+
+	public static void executeScript() {
+		String currentWindow=null;
+		memStatus_UIEnroll="";
+		try {
+			logExtentReport("Perform UI Enrollment - " + getCellValue("TCName"));
+			if (getCellValue("NoOfMembersRequired").isEmpty()) {
+				setCellValue("NoOfMembersRequired", "1");
+			}
+			for (int i = 0; i < Integer.parseInt(getCellValue("NoOfMembersRequired")); i++) {
+				try {
+					// Open Environment and Login into Application
+					ApplicationMethods.openAndLoginIntoApplication(getCellValue("Environment"));
+					
+					/** Perform Medicare Advantage UI Enrollment **/ 
+					//Fill Pre entry Data in UI Enrollment form 
+					if(isLastTestPassed())
+						NewEnrollmentForm.get().fillPreEntryData();
+					//Fill Medicare Card Information in UI Enrollment form
+					if(isLastTestPassed()) {
+						NewEnrollmentForm.get().fillMedicareCardInfo();
+						currentWindow = getWebDriver().getWindowHandle();
+					}
+					//provide PCP details in UI Enrollment form
+					if(isLastTestPassed())
+						NewEnrollmentForm.get().fillPCPEntry();
+					//Switch to Current window from PCP Pop up window
+					if(isLastTestPassed())
+						switchWindow(currentWindow);
+					//Fill monthly premium details in UI Enrollment form
+					if(isLastTestPassed())
+						NewEnrollmentForm.get().fillMonthlyPremium();
+					//Fill Enrollee data in UI Enrollment form
+					if(isLastTestPassed())
+						NewEnrollmentForm.get().fillEnroleeData();
+					//Fill Election period details in UI Enrollment form
+					if(isLastTestPassed())
+						NewEnrollmentForm.get().fillElectionPeriods();
+					//Fill Signature authorization details in UI Enrollment form
+					if(isLastTestPassed())
+						NewEnrollmentForm.get().fillSignartureAuthorization();
+					//Save Application
+					if(isLastTestPassed()) {
+						currentWindow = getWebDriver().getWindowHandle();
+						saveAppl(currentWindow);
+					}
+					 // Perform MemberSearch and verify whether its status is as per expected status or not 
+					 if(isLastTestPassed())
+						 ApplicationMethods.verifyMemberStatus(getCellValue("ExpectedStatusbeforeInfoCrossing"),asmMemberID); 
+					// Update info Crossing details and Reverify Member status turned to Pending or not
+					if (isLastTestPassed())
+						updateEligibilityCheck();
+					
+					//verify BEQ Ready To Submit status present on not in Work Item history
+				//	if (isLastTestPassed())
+				//		ApplicationMethods.verifyStatusInWrkItemHist("BEQ Ready To Submit");
+						
+					
+					//update Enrollment details into Output sheet
+					count = ApplicationMethods.updateOutputIntoExcel(file);
+					
+					
+				} catch (Exception e) {
+					e.printStackTrace();
+					setResult(false);
+
+				} finally {
+					ApplicationMethods.logout();
+					
+				}
+
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			setResult(false);
+
+		} finally {
+			seCloseBrowser();
+			GenerateBEQResponse.generateBEQFile(file.toString(),filePath + EnvHelper.getValue("UIOutputTxtFile").toString());
+			
+		}
+	}
+
+	/**
+	 * Method to Update Eligilibility Chcek details from UI Enrollment
+	 * 
+	 * @param
+	 * @return
+	 */
+
+	public static void updateEligibilityCheck() {
+		try {
+			String currentWindow = null;
+			seClick(MemberSearch.get().searchResult_1stCheckBox, "1st Search result");
+			seClick(MemberSearch.get().viewRecord, "View");
+			String tempPlanType=getCellValue("PlanType");
+			if (tempPlanType.contains("CSNP")) {
+				seWaitForWebElement(5, ExpectedConditions.elementToBeClickable(MemberProfile.get().memberDetails));
+				seWaitForElementLoad(MemberProfile.get().CSNPTracking);
+				seClick(MemberProfile.get().CSNPTracking, "CSNP Tracking");
+				if ((getCellValue("Package").contains("Heart")) || (getCellValue("Package").contains("Lung"))) {
+					seWaitForWebElement(10,
+							ExpectedConditions.elementToBeClickable(MemberProfile.get().addInCSNPHeartAndLungs));
+					seClick(MemberProfile.get().addInCSNPHeartAndLungs, "Add");
+					seWaitForWebElement(8, ExpectedConditions.elementToBeClickable(CSNPTracking.get().receivedInd));
+					seClick(CSNPTracking.get().receivedInd, "Received Indicator");
+					seSetText(CSNPTracking.get().signatureDate, getDate("MM/dd/yyyy", "Current"));
+					seClick(CSNPTracking.get().postEnrlmtCSNPValidtnCmplte, "Post Enrollment CSNP Validation Complete");
+					if (getCellValue("Package").contains("Heart"))
+						seClick(CSNPTracking.get().heartLungFluidYes, "Heart Lung Fluid Yes");
+					if (getCellValue("Package").contains("Lung"))
+						seClick(CSNPTracking.get().breathingDificltyYes,
+								"Do you have difficulty breathing every day or almost every day even with normal activity?");
+					currentWindow = getWebDriver().getWindowHandle();
+					seClick(MemberProfile.get().saveInCSNPHrtAndLungs, "Save");
+				} else if (getCellValue("Package").contains("Diabetes")) {
+					seWaitForWebElement(10,
+							ExpectedConditions.elementToBeClickable(MemberProfile.get().addInCSNPDiabetes));
+					seClick(MemberProfile.get().addInCSNPDiabetes, "Add");
+					seWaitForWebElement(5,
+							ExpectedConditions.elementToBeClickable(CSNPTracking.get().recvedIndDiabetes));
+					seClick(CSNPTracking.get().recvedIndDiabetes, "Recived Ind");
+					seSetText(CSNPTracking.get().signatureDateDiabetes, getDate("MMddyyyy", "Current"),
+							"Signature Date");
+					seClick(CSNPTracking.get().chkBlookSugarAtHomeYes, "Do you check Blood Sugar at Home?");
+					seClick(CSNPTracking.get().highBloodSugarNo, "Do you have High blood sugar?");
+					seClick(CSNPTracking.get().medicineToCntrlBloodSugarNo,
+							"Do you take medicine to control blood sugar?");
+					seClick(CSNPTracking.get().postEnrlmntCSNPValidnCmplt, "Post Enrollment CSNP Validation Complete");
+					currentWindow = getWebDriver().getWindowHandle();
+					seClick(MemberProfile.get().saveInCSNPDiab, "Save");
+				} else if (getCellValue("Package").contains("Multi-Condition")) {
+					seWaitForWebElement(10,
+							ExpectedConditions.elementToBeClickable(MemberProfile.get().addInCSNPMultiCond));
+					seClick(MemberProfile.get().addInCSNPMultiCond, "Add");
+					seWaitForWebElement(5,
+							ExpectedConditions.elementToBeClickable(CSNPTracking.get().multiCondReceivedInd));
+					seClick(CSNPTracking.get().multiCondReceivedInd, "Recived Ind");
+					seSetText(CSNPTracking.get().multiCondSignDate, getDate("MMddyyyy", "Current"), "Signature Date");
+					seClick(CSNPTracking.get().multiCondCHFChckbx, "Congestive Heart Failure(CHF) checkbox");
+					seClick(CSNPTracking.get().multiCondCDChckbx, "Cardiovascular disease check box");
+					seClick(CSNPTracking.get().multiCondFluidYes, "Do you have fluid in your lungs?");
+					seClick(CSNPTracking.get().multiCondSwellingFeedNo,
+							"Do you have swelling in your feet & legs almost every day because of too much fluid in your body? ");
+					seClick(CSNPTracking.get().multiCondFluidMdcnNo,
+							"Do you take medicine for the fluid in your lungs or to help your heart beat stronger? ");
+					seClick(CSNPTracking.get().multiCondHrtAtckYes,
+							"Have you had a heart attack or been told by your doctor you are at risk to have one? ");
+					seClick(CSNPTracking.get().multiCondHrtPainNo,
+							"Do you have heart pain(angina) or leg pain(claudication) brought on when you are active? ");
+					seClick(CSNPTracking.get().multiCondHrtMdcnNo,
+							"Do you take medicine for your heart or circulation? ");
+					seClick(CSNPTracking.get().multiCondBSChkYes, "Do you check your blood sugar at home?");
+					seClick(CSNPTracking.get().multiCondBSNo, "Do you have high blood sugar?");
+					seClick(CSNPTracking.get().multiCondBSMdcnNo, "Do you take medicine to control your blood sugar? ");
+					currentWindow = getWebDriver().getWindowHandle();
+					seClick(MemberProfile.get().saveInCSNPMultiCond, "Save");
+				}
+				
+
+			} else if (tempPlanType.contains("DSNP")) {
+				seWaitForWebElement(5, ExpectedConditions.elementToBeClickable(MemberProfile.get().memberDetails));
+				seWaitForElementLoad(MemberProfile.get().DSNPTracking);
+				seClick(MemberProfile.get().DSNPTracking, "DSNP Tracking");
+				seWaitForElementLoad(DSNPTracking.get().medicaidNo);
+				seClick(MemberProfile.get().add, "Add");
+				seWaitForWebElement(7, ExpectedConditions.elementToBeClickable(DSNPTracking.get().medicaidNo));
+				seSetText(DSNPTracking.get().medicaidNo, String.valueOf(randomNumber(9)), "Medicaid No");
+				seSetText(DSNPTracking.get().startDate, getDate("MM/dd/yyyy", "FirstDayOfMonth"), "Start Date");
+				seSetText(DSNPTracking.get().endDate, getDate("MM/dd/yyyy", "LastDayOfMonth"), "End Date");
+				seClick(DSNPTracking.get().medicaidConfirmedChckbx, "Medicaid Confirmed Checkbox");
+				seSelectText(DSNPTracking.get().medicaidLevel, 1, "Medicaid Level");
+				currentWindow = getWebDriver().getWindowHandle();
+				seClick(MemberProfile.get().saveinSubSection, "Save");
+				seContainString(true, seGetText(MemberProfile.get().messageSummary),
+						"Medicaid Eligilbility Details has been saved", "Verify message after clicked on save");
+
+			} else if ((tempPlanType.contains("ISNP")) || (tempPlanType.contains("ESNP"))) {
+				seWaitForWebElement(5, ExpectedConditions.elementToBeClickable(MemberProfile.get().memberDetails));
+				seWaitForElementLoad(MemberProfile.get().ISNP_ESNP_Tracking);
+				seClick(MemberProfile.get().ISNP_ESNP_Tracking, "I/E-SNP Tracking");
+				seWaitForWebElement(5, ExpectedConditions.elementToBeClickable(ISNP_ESNPTracking.get().addInISNP_ESNP));
+				seClick(ISNP_ESNPTracking.get().addInISNP_ESNP, "Add");
+				seWaitForWebElement(5, ExpectedConditions.elementToBeClickable(ISNP_ESNPTracking.get().receivedInd));
+				seClick(ISNP_ESNPTracking.get().receivedInd, "Received Ind");
+				seSetText(ISNP_ESNPTracking.get().effectiveDate, getDate("MMddyyyy", "Current"), "Effective Date");
+				seSetText(ISNP_ESNPTracking.get().facilityName, ApplicationMethods.getRandomData("alpha"), "Facility Name");
+				currentWindow = getWebDriver().getWindowHandle();
+				seClick(ISNP_ESNPTracking.get().saveInISNP_ESNP, "Save");
+				seWaitForWebElement(5,
+						ExpectedConditions.textToBePresentInElement(ISNP_ESNPTracking.get().iesnpRowLabel, "1 of 1"));
+				seContainString(true, seGetText(ISNP_ESNPTracking.get().iesnpRowLabel), "1 of 1",
+						"Verify records after clicked on save");
+
+			}
+			if((tempPlanType.contains("ISNP"))|| (tempPlanType.contains("ESNP"))||(tempPlanType.contains("DSNP")) || (tempPlanType.contains("CSNP"))){
+				try {
+					new WebDriverWait(getWebDriver(),3).until(ExpectedConditions.alertIsPresent());
+					Alert alert = getWebDriver().switchTo().alert();
+					if (alert.getText()
+							.contains("Please ensure the Post Enrollment Validation Complete Indicator is reviewed")) {
+						alert.accept();
+						Thread.sleep(2000);
+						getWebDriver().switchTo().window(currentWindow);
+					}
+				} catch (Exception e) {
+				}
+				seWaitForWebElement(5, ExpectedConditions.elementToBeClickable(MemberProfile.get().memberDetails));
+				seClick(MemberProfile.get().memberDetails, "Member Details");
+				try {
+					new WebDriverWait(getWebDriver(), 2).until(ExpectedConditions.alertIsPresent());
+					Alert alert = getWebDriver().switchTo().alert();
+					if (alert.getText().contains("You have some unsaved changes in this section")) {
+						alert.accept();
+						Thread.sleep(1000);
+						getWebDriver().switchTo().window(currentWindow);
+					}
+				} catch (Exception e) {
+					System.out.println("There is no Alert Pop up");
+				}
+			}
+			Thread.sleep(3000);
+			seWaitForPageLoad();
+			seWaitForElementLoad(MemberProfile.get().StatisticsTab);
+			seWaitForWebElement(6, ExpectedConditions.elementToBeClickable(MemberProfile.get().StatisticsTab));
+			seClick(MemberProfile.get().StatisticsTab, "Statistics");
+			seWaitForWebElement(2, ExpectedConditions.elementToBeClickable(MemberProfile.get().eligibilityChecked));
+			seClick(MemberProfile.get().eligibilityChecked, "Eligibility Checked");
+			seClick(MemberProfile.get().saveinMemProfileSubSection, "Save");
+			Thread.sleep(2000);
+			seWaitForPageLoad();
+			while(!MemberProfile.get().messageSummary.isDisplayed()) {
+				
+			}
+			seContainString(true, seGetText(MemberProfile.get().messageSummary),
+					"Member details have been updated successfully", "Verify message after clicking on save");
+//			seWaitForWebElement(3, ExpectedConditions.elementToBeClickable(MemberProfile.get().saveinMainSection));
+//			seClick(MemberProfile.get().saveinMainSection, "Save");
+//			Thread.sleep(1000);
+//			seWaitForWebElement(5, ExpectedConditions.elementToBeClickable(MemberProfile.get().messageSummary));
+//			seContainString(true, seGetText(MemberProfile.get().messageSummary),
+//					"Member details have been updated successfully", "Verify message after clicking on save");
+			seWaitForWebElement(6, ExpectedConditions.elementToBeClickable(MemberProfile.get().submit));
+			seClick(MemberProfile.get().submit, "Submit");
+			Thread.sleep(3000);
+			seWaitForPageLoad();
+			while(!MemberProfile.get().messageSummary.isDisplayed()) {
+				
+			}
+			if (MemberProfile.get().resolutionStatus.isDisplayed()) {
+				seSelectText(MemberProfile.get().resolutionStatus, getCellValue("ResolutionStatus"),
+						"Resolution Status");
+				seSetText(MemberProfile.get().dairyNotes, getCellValue("Dairynotes"));
+				seClick(MemberProfile.get().OK, "OK");
+				//seWaitForElementLoad(MemberHome.get().filterPanel);
+				seWaitForWebElement(7, ExpectedConditions.elementToBeClickable(MemberHome.get().memberSearch));
+				seClick(MemberHome.get().memberSearch, "Member Search");
+
+				// Search with ASM Member ID
+				seWaitForWebElement(4, ExpectedConditions.elementToBeClickable(MemberSearch.get().ASMMemberID));
+				seSetText(MemberSearch.get().ASMMemberID, asmMemberID);
+				seClick(MemberSearch.get().search, "Search");
+				Thread.sleep(2000);
+				seWaitForElementLoad(MemberSearch.get().searchResultsGrid);
+				
+			} else {
+				seContainString(true, seGetText(MemberProfile.get().messageSummary),
+						"Enrollment details have been submitted successfully.",
+						"Verify message after clicking on Submit");
+			}
+			
+			//Verify Member status
+			String memStatus=seGetText(MemberProfile.get().status);
+			if (memStatus.contains("Pending")) {
+				log(PASS, "Verify Member Status", "Enrolled Member is in Pending Status");
+				memStatus_UIEnroll="Pending";
+			}else {
+				//setCellValue("StatusAfterExecution", seGetText(MemberSearch.get().status));
+				log(FAIL, "Verify Member Status", "Enrolled Member is in " + memStatus+" Status which is not as per expectation");
+				memStatus_UIEnroll=memStatus;
+				setLastTestPassed(false);
+			}
+					
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			log(FAIL, e.getMessage(),true);
+			setLastTestPassed(false);
+		}
+	}
+	//To switch to specific window
+		public static void switchWindow(String currentWindow) {
+			try {
+			Thread.sleep(1000);
+			getWebDriver().switchTo().window(currentWindow);
+			}catch (Exception e) {
+				e.printStackTrace();
+				log(FAIL, e.getMessage(),true);
+				setLastTestPassed(false);
+			}
+		}
+		/**
+		 * Method to save New Enrollment Application
+		 * 
+		 * @param currentWindow handle
+		 * @return
+		 */
+		public static void saveAppl(String currentWindow){
+			try {
+			seClick(NewEnrollmentForm.get().save, "Save");
+			Thread.sleep(1000);
+			// Handle duplicate DCN pop up
+			try {
+				Alert alert = getWebDriver().switchTo().alert();
+				alert.accept();
+				getWebDriver().switchTo().window(currentWindow);
+			} catch (NoAlertPresentException e) {
+
+			}
+			seWaitForWebElement(3, ExpectedConditions.elementToBeClickable(NewEnrollmentForm.get().DCN));
+			seWaitForPageLoad();
+			String msgSummary=seGetText(NewEnrollmentForm.get().messageSummary);
+			//if (seGetText(getWebDriver().findElement(By.id("aspnetForm")))
+			//		.contains("Enrollment Completed Successfully.")) {
+			if (msgSummary.contains("Enrollment Completed Successfully.")) {
+				log(PASS, "Member Enrollment is Successful");
+				String memberID = msgSummary;
+				asmMemberID = memberID.split("Enrollment Completed Successfully. The Member ID is ")[1].trim();
+				
+			} else {
+				setLastTestPassed(false);
+				log(FAIL, "Member Enrollment is unsuccessful");
+			}
+			}catch (Exception e) {
+				e.printStackTrace();
+				log(FAIL, e.getMessage());
+				setLastTestPassed(false);
+			}
+		}
+
+}
